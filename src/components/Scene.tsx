@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Cessna172 } from '@/components/aircraft/Cessna172';
@@ -19,7 +19,12 @@ const PhysicsUpdater: React.FC = () => {
 };
 
 export const Scene: React.FC = () => {
+  const [mounted, setMounted] = useState(false);
   const { aircraft, gameSettings } = useSimulatorStore();
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   // グラフィック設定に基づくシャドウマップサイズ
   const shadowMapSize = {
@@ -28,6 +33,10 @@ export const Scene: React.FC = () => {
     high: 2048,
     ultra: 4096,
   }[gameSettings.graphics];
+  
+  if (!mounted) {
+    return null;
+  }
   
   return (
     <Canvas
