@@ -1,0 +1,5 @@
+module.exports = {
+  experimental: {
+    optimizePackageImports: ['@react-three/drei', '@react-three/fiber'],
+  },
+}
