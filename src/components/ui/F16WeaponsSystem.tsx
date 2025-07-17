@@ -15,11 +15,6 @@ export const F16WeaponsSystem: React.FC = () => {
   const [selectedWeapon, setSelectedWeapon] = useState<string>('aim9');
   const [masterArm, setMasterArm] = useState(false);
   
-  // F-16以外では表示しない
-  if (aircraft.type !== 'f16') {
-    return null;
-  }
-  
   // 武装システムの初期設定
   const [weapons] = useState<Weapon[]>([
     { id: 'aim9', name: 'AIM-9 Sidewinder', type: 'missile', quantity: 2, maxQuantity: 2, armed: false },
@@ -30,6 +25,11 @@ export const F16WeaponsSystem: React.FC = () => {
   ]);
   
   const currentWeapon = weapons.find(w => w.id === selectedWeapon);
+  
+  // F-16以外では表示しない
+  if (aircraft.type !== 'f16') {
+    return null;
+  }
   
   return (
     <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 pointer-events-none">

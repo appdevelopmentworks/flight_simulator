@@ -49,10 +49,10 @@ export const Scene: React.FC = () => {
       }}
       gl={{
         antialias: gameSettings.graphics !== 'low',
-        shadowMap: {
-          enabled: true,
-          type: THREE.PCFSoftShadowMap,
-        },
+      }}
+      onCreated={({ gl }) => {
+        gl.shadowMap.enabled = true;
+        gl.shadowMap.type = THREE.PCFSoftShadowMap;
       }}
     >
       {/* 物理演算の更新 */}
