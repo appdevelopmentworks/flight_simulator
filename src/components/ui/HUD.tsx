@@ -23,27 +23,27 @@ export const HUD: React.FC = () => {
     <div className="fixed top-0 left-0 w-full h-full pointer-events-none">
       <div className="relative w-full h-full">
         {/* 左上: 速度と高度 */}
-        <div className="absolute top-4 left-4 space-y-2">
+        <div className="absolute top-2 left-2 md:top-4 md:left-4 space-y-1 md:space-y-2">
           {hudSettings.showAirspeed && (
-            <div className="hud-text bg-black/50 px-3 py-1 rounded">
+            <div className="hud-text bg-black/50 px-2 py-1 md:px-3 md:py-1 rounded">
               <span className="text-xs opacity-70">IAS</span>
-              <div className={`text-2xl font-bold ${isNearStall ? 'warning-text' : ''}`}>
-                {Math.round(aircraft.airspeed)} <span className="text-sm">km/h</span>
+              <div className={`text-lg md:text-2xl font-bold ${isNearStall ? 'warning-text' : ''}`}>
+                {Math.round(aircraft.airspeed)} <span className="text-xs md:text-sm">km/h</span>
               </div>
             </div>
           )}
           
           {hudSettings.showAltitude && (
-            <div className="hud-text bg-black/50 px-3 py-1 rounded">
+            <div className="hud-text bg-black/50 px-2 py-1 md:px-3 md:py-1 rounded">
               <span className="text-xs opacity-70">ALT</span>
-              <div className="text-2xl font-bold">
-                {Math.round(aircraft.altitude)} <span className="text-sm">m</span>
+              <div className="text-lg md:text-2xl font-bold">
+                {Math.round(aircraft.altitude)} <span className="text-xs md:text-sm">m</span>
               </div>
             </div>
           )}
           
           {hudSettings.showVerticalSpeed && (
-            <div className="hud-text bg-black/50 px-3 py-1 rounded">
+            <div className="hud-text bg-black/50 px-2 py-1 md:px-3 md:py-1 rounded mobile-hidden">
               <span className="text-xs opacity-70">V/S</span>
               <div className="text-lg font-bold">
                 {aircraft.verticalSpeed > 0 ? '+' : ''}{aircraft.verticalSpeed.toFixed(1)} <span className="text-sm">m/s</span>
@@ -53,29 +53,29 @@ export const HUD: React.FC = () => {
         </div>
         
         {/* 右上: 燃料とエンジン情報 */}
-        <div className="absolute top-4 right-4 space-y-2">
+        <div className="absolute top-2 right-2 md:top-4 md:right-4 space-y-1 md:space-y-2">
           {hudSettings.showFuel && (
-            <div className="hud-text bg-black/50 px-3 py-1 rounded text-right">
+            <div className="hud-text bg-black/50 px-2 py-1 md:px-3 md:py-1 rounded text-right">
               <span className="text-xs opacity-70">FUEL</span>
-              <div className={`text-xl font-bold ${isLowFuel ? 'warning-text' : ''}`}>
+              <div className={`text-lg md:text-xl font-bold ${isLowFuel ? 'warning-text' : ''}`}>
                 {fuelPercentage.toFixed(1)}%
               </div>
-              <div className="text-xs opacity-70">
+              <div className="text-xs opacity-70 mobile-hidden">
                 {aircraft.fuel.toFixed(1)} L
               </div>
             </div>
           )}
           
-          <div className="hud-text bg-black/50 px-3 py-1 rounded text-right">
+          <div className="hud-text bg-black/50 px-2 py-1 md:px-3 md:py-1 rounded text-right mobile-hidden">
             <span className="text-xs opacity-70">RPM</span>
-            <div className="text-xl font-bold">
+            <div className="text-lg md:text-xl font-bold">
               {Math.round(aircraft.engineRPM)}
             </div>
           </div>
           
-          <div className="hud-text bg-black/50 px-3 py-1 rounded text-right">
+          <div className="hud-text bg-black/50 px-2 py-1 md:px-3 md:py-1 rounded text-right mobile-hidden">
             <span className="text-xs opacity-70">THR</span>
-            <div className="text-xl font-bold">
+            <div className="text-lg md:text-xl font-bold">
               {Math.round(aircraft.throttle * 100)}%
             </div>
           </div>
@@ -83,12 +83,12 @@ export const HUD: React.FC = () => {
         
         {/* 上部中央: コンパス */}
         {hudSettings.showHeading && (
-          <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
-            <div className="hud-text bg-black/50 px-4 py-2 rounded">
-              <div className="text-3xl font-bold text-center">
+          <div className="absolute top-2 md:top-4 left-1/2 transform -translate-x-1/2">
+            <div className="hud-text bg-black/50 px-2 py-1 md:px-4 md:py-2 rounded">
+              <div className="text-xl md:text-3xl font-bold text-center">
                 {Math.round(aircraft.heading).toString().padStart(3, '0')}°
               </div>
-              <div className="flex justify-center mt-1 space-x-2 text-xs opacity-70">
+              <div className="flex justify-center mt-1 space-x-2 text-xs opacity-70 mobile-hidden">
                 <span>N</span>
                 <span>E</span>
                 <span>S</span>
@@ -99,28 +99,28 @@ export const HUD: React.FC = () => {
         )}
         
         {/* 下部: ステータス情報 */}
-        <div className="absolute bottom-4 left-4 space-y-1">
+        <div className="absolute bottom-16 md:bottom-4 left-2 md:left-4 space-y-1">
           {aircraft.landingGear && (
-            <div className="hud-text bg-black/50 px-2 py-1 rounded text-sm">
-              GEAR DOWN
+            <div className="hud-text bg-black/50 px-2 py-1 rounded text-xs md:text-sm">
+              GEAR
             </div>
           )}
           
           {aircraft.flaps > 0 && (
-            <div className="hud-text bg-black/50 px-2 py-1 rounded text-sm">
+            <div className="hud-text bg-black/50 px-2 py-1 rounded text-xs md:text-sm mobile-hidden">
               FLAPS {Math.round(aircraft.flaps)}°
             </div>
           )}
           
           {aircraft.brakes && (
-            <div className="hud-text bg-black/50 px-2 py-1 rounded text-sm warning-text">
-              BRAKES
+            <div className="hud-text bg-black/50 px-2 py-1 rounded text-xs md:text-sm warning-text">
+              BRK
             </div>
           )}
           
           {gameSettings.assists.autopilot && (
-            <div className="hud-text bg-black/50 px-2 py-1 rounded text-sm text-blue-400">
-              AUTOPILOT
+            <div className="hud-text bg-black/50 px-2 py-1 rounded text-xs md:text-sm text-blue-400">
+              AP
             </div>
           )}
         </div>

@@ -76,3 +76,58 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-gray-500;
 }
+
+/* モバイル対応のレスポンシブスタイル */
+@media (max-width: 768px) {
+  /* フライトシミュレーター画面の基本調整 */
+  #__next {
+    height: 100dvh; /* dvh for mobile viewport */
+  }
+  
+  /* HUDテキストのサイズ調整 */
+  .hud-text {
+    @apply text-xs;
+  }
+  
+  /* 計器パネルの縮小 */
+  .instrument-panel {
+    @apply p-2 text-xs;
+  }
+  
+  /* ボタンのタッチ対応 */
+  button {
+    min-height: 44px; /* iOS推奨タップ領域 */
+    touch-action: manipulation;
+  }
+  
+  /* モバイル専用のクラス */
+  .mobile-hidden {
+    @apply hidden;
+  }
+  
+  .mobile-only {
+    @apply block;
+  }
+  
+  /* タッチ操作改善 */
+  .touch-optimized {
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-only {
+    @apply hidden;
+  }
+}
+
+/* タッチデバイス用のスタイル */
+@media (hover: none) and (pointer: coarse) {
+  /* タッチフィードバック */
+  button:active {
+    transform: scale(0.95);
+    transition: transform 0.1s;
+  }
+}
