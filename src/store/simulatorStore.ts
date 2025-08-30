@@ -226,7 +226,7 @@ const initializeStore = () => {
 // Zustandストア（永続化対応）
 export const useSimulatorStore = create<SimulatorState>()(
   subscribeWithSelector(
-    persist(
+    persist<SimulatorState>(
       (set, get) => {
         const initialData = initializeStore();
         
@@ -568,54 +568,6 @@ export const useSimulatorStore = create<SimulatorState>()(
       },
       {
         name: 'simulator-settings',
-        partialize: (state) => ({
-          gameSettings: state.gameSettings,
-          hudSettings: state.hudSettings,
-          cameraView: state.cameraView
-        }),
-        // カスタムストレージでstorageManagerを使用（SSR対応）
-        storage: {
-          getItem: (name: string) => {
-            if (typeof window === 'undefined') {
-              return null;
-            }
-            try {
-              const data = storageManager.loadSettings();
-              return data ? JSON.stringify(data) : null;
-            } catch (error) {
-              console.error('Failed to load from storageManager:', error);
-              return null;
-            }
-          },
-          setItem: (name: string, value: string) => {
-            if (typeof window === 'undefined') {
-              return;
-            }
-            try {
-              const parsedValue = JSON.parse(value);
-              const settings = {
-                gameSettings: parsedValue.state?.gameSettings || defaultGameSettings,
-                hudSettings: parsedValue.state?.hudSettings || defaultHUDSettings,
-                controlSettings: {
-                  keyBindings: {},
-                  joystickSettings: undefined
-                },
-                version: '1.0.0',
-                lastSaved: Date.now()
-              };
-              storageManager.saveSettings(settings);
-            } catch (error) {
-              console.error('Failed to save to storageManager:', error);
-            }
-          },
-          removeItem: (name: string) => {
-            if (typeof window === 'undefined') {
-              return;
-            }
-            // 設定のリセット時に使用
-            storageManager.clearAllData();
-          }
-        }
       }
     )
   )
