@@ -11,7 +11,6 @@ export const useEngineSound = () => {
   const jetGainNodeRef = useRef<GainNode | null>(null);
   const afterburnerOscillatorRef = useRef<OscillatorNode | null>(null);
   const afterburnerGainNodeRef = useRef<GainNode | null>(null);
-  const noiseNodeRef = useRef<AudioBufferSourceNode | null>(null);
   const noiseGainNodeRef = useRef<GainNode | null>(null);
   const { aircraft, gameSettings } = useSimulatorStore();
   
@@ -72,37 +71,54 @@ export const useEngineSound = () => {
     }
     
     return () => {
-      // クリーンアップ
-      if (oscillatorRef.current) {
-        oscillatorRef.current.stop();
-        oscillatorRef.current.disconnect();
+      // クリーンアップ - 各refの現在の値をローカル変数にコピーして使用
+      const oscillator = oscillatorRef.current;
+      const gainNode = gainNodeRef.current;
+      const jetOscillator = jetOscillatorRef.current;
+      const jetGainNode = jetGainNodeRef.current;
+      const afterburnerOscillator = afterburnerOscillatorRef.current;
+      const afterburnerGainNode = afterburnerGainNodeRef.current;
+      const noiseGainNode = noiseGainNodeRef.current;
+      const audioContext = audioContextRef.current;
+      
+      if (oscillator) {
+        try {
+          oscillator.stop();
+          oscillator.disconnect();
+        } catch (e) {
+          // オシレータがすでに停止している場合のエラーを無視
+        }
       }
-      if (gainNodeRef.current) {
-        gainNodeRef.current.disconnect();
+      if (gainNode) {
+        gainNode.disconnect();
       }
-      if (jetOscillatorRef.current) {
-        jetOscillatorRef.current.stop();
-        jetOscillatorRef.current.disconnect();
+      if (jetOscillator) {
+        try {
+          jetOscillator.stop();
+          jetOscillator.disconnect();
+        } catch (e) {
+          // オシレータがすでに停止している場合のエラーを無視
+        }
       }
-      if (jetGainNodeRef.current) {
-        jetGainNodeRef.current.disconnect();
+      if (jetGainNode) {
+        jetGainNode.disconnect();
       }
-      if (afterburnerOscillatorRef.current) {
-        afterburnerOscillatorRef.current.stop();
-        afterburnerOscillatorRef.current.disconnect();
+      if (afterburnerOscillator) {
+        try {
+          afterburnerOscillator.stop();
+          afterburnerOscillator.disconnect();
+        } catch (e) {
+          // オシレータがすでに停止している場合のエラーを無視
+        }
       }
-      if (afterburnerGainNodeRef.current) {
-        afterburnerGainNodeRef.current.disconnect();
+      if (afterburnerGainNode) {
+        afterburnerGainNode.disconnect();
       }
-      if (noiseNodeRef.current) {
-        noiseNodeRef.current.stop();
-        noiseNodeRef.current.disconnect();
+      if (noiseGainNode) {
+        noiseGainNode.disconnect();
       }
-      if (noiseGainNodeRef.current) {
-        noiseGainNodeRef.current.disconnect();
-      }
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
+      if (audioContext && audioContext.state !== 'closed') {
+        audioContext.close();
       }
     };
   }, []);

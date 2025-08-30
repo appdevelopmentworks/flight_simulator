@@ -118,7 +118,7 @@ export const F16: React.FC = () => {
       
       {/* 翼端ミサイル（AIM-9） */}
       <group position={[6, -0.3, 0]}>
-        <mesh castShadow>
+        <mesh rotation={[Math.PI / 2, 0, 0]} castShadow>
           <capsuleGeometry args={[0.15, 2, 4, 8]} />
           <meshStandardMaterial color="#E5E7EB" metalness={0.7} roughness={0.3} />
         </mesh>
@@ -128,7 +128,7 @@ export const F16: React.FC = () => {
         </mesh>
       </group>
       <group position={[-6, -0.3, 0]}>
-        <mesh castShadow>
+        <mesh rotation={[Math.PI / 2, 0, 0]} castShadow>
           <capsuleGeometry args={[0.15, 2, 4, 8]} />
           <meshStandardMaterial color="#E5E7EB" metalness={0.7} roughness={0.3} />
         </mesh>

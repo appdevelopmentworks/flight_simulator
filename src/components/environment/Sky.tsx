@@ -3,7 +3,7 @@ import { Sky as DreiSky, Cloud, Stars } from '@react-three/drei';
 import { useSimulatorStore } from '@/store/simulatorStore';
 
 export const Sky: React.FC = () => {
-  const { weather, simulationTime } = useSimulatorStore();
+  const { weather } = useSimulatorStore();
   
   // 時刻に基づく太陽の位置計算（簡略化）
   const sunPosition = React.useMemo(() => {
@@ -17,7 +17,7 @@ export const Sky: React.FC = () => {
       elevation: Math.max(45, elevation), // 最低でも45度の高さを保つ
       azimuth,
     };
-  }, [simulationTime]);
+  }, []); // 固定値なので依存配列は空
   
   // 天候に基づく空の設定
   const skyProps = React.useMemo(() => {

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSimulatorStore } from '@/store/simulatorStore';
+import { storageManager } from '@/utils/storageManager';
 
 interface PauseMenuProps {
   onResume: () => void;
@@ -15,11 +16,39 @@ export const PauseMenu: React.FC<PauseMenuProps> = ({ onResume }) => {
     aircraft
   } = useSimulatorStore();
   
-  const [activeTab, setActiveTab] = React.useState<'game' | 'controls' | 'graphics' | 'hud'>('game');
+  const [activeTab, setActiveTab] = React.useState<'game' | 'controls' | 'graphics' | 'hud' | 'storage'>('game');
+  const [exportData, setExportData] = React.useState<string>('');
+  const [importData, setImportData] = React.useState<string>('');
   
   const handleRestart = () => {
     resetAircraft(aircraft.type);
     onResume();
+  };
+
+  const handleExportData = () => {
+    const data = storageManager.exportData();
+    setExportData(data);
+    navigator.clipboard.writeText(data);
+  };
+
+  const handleImportData = async () => {
+    if (!importData.trim()) return;
+    
+    const success = storageManager.importData(importData);
+    if (success) {
+      alert('データのインポートが完了しました。');
+      window.location.reload(); // 設定を反映するためリロード
+    } else {
+      alert('データのインポートに失敗しました。');
+    }
+  };
+
+  const handleClearData = () => {
+    if (confirm('全てのデータを削除しますか？この操作は元に戻せません。')) {
+      storageManager.clearAllData();
+      alert('データが削除されました。');
+      window.location.reload();
+    }
   };
   
   return (
@@ -38,7 +67,7 @@ export const PauseMenu: React.FC<PauseMenuProps> = ({ onResume }) => {
         
         {/* タブ */}
         <div className="flex space-x-1 mb-6">
-          {(['game', 'controls', 'graphics', 'hud'] as const).map((tab) => (
+          {(['game', 'controls', 'graphics', 'hud', 'storage'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -52,6 +81,7 @@ export const PauseMenu: React.FC<PauseMenuProps> = ({ onResume }) => {
               {tab === 'controls' && 'コントロール'}
               {tab === 'graphics' && 'グラフィック'}
               {tab === 'hud' && 'HUD'}
+              {tab === 'storage' && 'データ'}
             </button>
           ))}
         </div>
@@ -213,6 +243,82 @@ export const PauseMenu: React.FC<PauseMenuProps> = ({ onResume }) => {
                   {key === 'showMap' && 'ミニマップ'}
                 </label>
               ))}
+            </div>
+          )}
+          
+          {/* データ管理設定 */}
+          {activeTab === 'storage' && (
+            <div className="space-y-6">
+              {/* ストレージ情報 */}
+              <div>
+                <h3 className="text-white font-semibold mb-3">ストレージ情報</h3>
+                <div className="bg-gray-700 p-4 rounded-lg">
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-gray-400">使用量:</span>
+                      <span className="text-white ml-2">{(storageManager.getStorageSize().used / 1024).toFixed(1)} KB</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400">利用可能:</span>
+                      <span className="text-white ml-2">{(storageManager.getStorageSize().available / (1024 * 1024)).toFixed(1)} MB</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* データエクスポート */}
+              <div>
+                <h3 className="text-white font-semibold mb-3">データエクスポート</h3>
+                <button
+                  onClick={handleExportData}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors mb-2"
+                >
+                  設定をクリップボードにコピー
+                </button>
+                {exportData && (
+                  <div className="mt-2">
+                    <textarea
+                      value={exportData}
+                      readOnly
+                      className="w-full h-24 bg-gray-700 text-white text-xs p-2 rounded border-gray-600"
+                      placeholder="エクスポートされたデータがここに表示されます"
+                    />
+                    <p className="text-gray-400 text-xs mt-1">データがクリップボードにコピーされました</p>
+                  </div>
+                )}
+              </div>
+              
+              {/* データインポート */}
+              <div>
+                <h3 className="text-white font-semibold mb-3">データインポート</h3>
+                <textarea
+                  value={importData}
+                  onChange={(e) => setImportData(e.target.value)}
+                  className="w-full h-24 bg-gray-700 text-white text-xs p-2 rounded border border-gray-600 mb-2"
+                  placeholder="インポートするJSONデータを貼り付けてください"
+                />
+                <button
+                  onClick={handleImportData}
+                  disabled={!importData.trim()}
+                  className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+                >
+                  データをインポート
+                </button>
+              </div>
+              
+              {/* 危険な操作 */}
+              <div>
+                <h3 className="text-red-400 font-semibold mb-3">危険な操作</h3>
+                <button
+                  onClick={handleClearData}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                >
+                  全データを削除
+                </button>
+                <p className="text-gray-400 text-xs mt-1">
+                  設定、プロフィール、フライト記録など全てのデータが削除されます
+                </p>
+              </div>
             </div>
           )}
         </div>

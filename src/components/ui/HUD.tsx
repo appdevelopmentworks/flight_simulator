@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSimulatorStore } from '@/store/simulatorStore';
 import { UI_CONSTANTS } from '@/constants';
 import { F16HUD } from './F16HUD';
+import { WeatherRadar } from './WeatherRadar';
+import { NavigationDisplay } from './NavigationDisplay';
 
 export const HUD: React.FC = () => {
   const { aircraft, hudSettings, gameSettings } = useSimulatorStore();
+  const [showWeatherRadar, setShowWeatherRadar] = useState(false);
+  const [showNavigation, setShowNavigation] = useState(false);
   
   // F-16の場合は専用HUDを使用
   if (aircraft.type === 'f16') {
@@ -20,7 +24,7 @@ export const HUD: React.FC = () => {
   const isNearStall = aircraft.airspeed < 100; // 簡略化した失速警告
   
   return (
-    <div className="fixed top-0 left-0 w-full h-full pointer-events-none">
+    <div className="fixed top-0 left-0 w-full h-full pointer-events-none" role="region" aria-label="HUD flight information display">
       <div className="relative w-full h-full">
         {/* 左上: 速度と高度 */}
         <div className="absolute top-2 left-2 md:top-4 md:left-4 space-y-1 md:space-y-2">
@@ -156,7 +160,37 @@ export const HUD: React.FC = () => {
             <div className="w-2 h-2 border-2 border-green-400/50 rounded-full"></div>
           </div>
         </div>
+
+        {/* 天候レーダーボタン */}
+        <div className="absolute top-2 right-2 md:top-4 md:right-4 pointer-events-auto flex flex-col gap-2">
+          <button
+            onClick={() => setShowWeatherRadar(true)}
+            className="bg-black/50 text-green-400 px-3 py-2 rounded hover:bg-black/70 transition-colors border border-green-400/50 text-sm font-mono"
+            title="天候レーダー"
+          >
+            📡 WX
+          </button>
+          <button
+            onClick={() => setShowNavigation(true)}
+            className="bg-black/50 text-blue-400 px-3 py-2 rounded hover:bg-black/70 transition-colors border border-blue-400/50 text-sm font-mono"
+            title="航法システム"
+          >
+            🧭 NAV
+          </button>
+        </div>
       </div>
+
+      {/* 天候レーダーオーバーレイ */}
+      <WeatherRadar
+        isOpen={showWeatherRadar}
+        onClose={() => setShowWeatherRadar(false)}
+      />
+
+      {/* 航法システムオーバーレイ */}
+      <NavigationDisplay
+        isOpen={showNavigation}
+        onClose={() => setShowNavigation(false)}
+      />
     </div>
   );
 };

@@ -9,21 +9,25 @@ export const Terrain: React.FC = () => {
   
   return (
     <>
-      {/* 地面 */}
+      {/* 地面（滑走路の下に配置） */}
       <Plane
         args={[10000, 10000]}
         rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, 0, 0]}
+        position={[0, -0.5, 0]} // 地面を滑走路より下に配置
         receiveShadow
       >
-        <meshStandardMaterial color="#4a5d23" roughness={0.8} metalness={0.2} />
+        <meshStandardMaterial 
+          color="#2d5016" 
+          roughness={0.8} 
+          metalness={0.2}
+        />
       </Plane>
       
       {/* 滑走路 */}
       <Plane
         args={[60, 3000]}
         rotation={[-Math.PI / 2, 0, Math.PI * 0.11]} // 340度方向
-        position={[0, 0.01, 0]}
+        position={[0, 0.01, 0]} // 滑走路を地面の少し上に配置
         receiveShadow
       >
         <meshStandardMaterial color="#333333" roughness={0.9} metalness={0.1} />
@@ -35,7 +39,7 @@ export const Terrain: React.FC = () => {
           key={`centerline-${i}`}
           args={[1, 30]}
           rotation={[-Math.PI / 2, 0, Math.PI * 0.11]}
-          position={[0, 0.02, -1450 + i * 100]}
+          position={[0, 0.02, -1450 + i * 100]} // 滑走路の少し上
           receiveShadow
         >
           <meshStandardMaterial color="#ffffff" roughness={0.3} metalness={0.1} />
@@ -46,7 +50,7 @@ export const Terrain: React.FC = () => {
       <Plane
         args={[50, 10]}
         rotation={[-Math.PI / 2, 0, Math.PI * 0.11]}
-        position={[0, 0.02, -1490]}
+        position={[0, 0.02, -1490]} // 滑走路の少し上
         receiveShadow
       >
         <meshStandardMaterial color="#ffffff" roughness={0.3} metalness={0.1} />
@@ -86,7 +90,7 @@ export const Terrain: React.FC = () => {
       <Plane
         args={[20, 500]}
         rotation={[-Math.PI / 2, 0, 0]}
-        position={[80, 0.01, 0]}
+        position={[80, 0.01, 0]} // 地面レベル
         receiveShadow
       >
         <meshStandardMaterial color="#444444" roughness={0.9} metalness={0.1} />
@@ -96,7 +100,7 @@ export const Terrain: React.FC = () => {
       <Plane
         args={[300, 200]}
         rotation={[-Math.PI / 2, 0, 0]}
-        position={[200, 0.01, 100]}
+        position={[200, 0.01, 100]} // 地面レベル
         receiveShadow
       >
         <meshStandardMaterial color="#555555" roughness={0.85} metalness={0.15} />
@@ -106,13 +110,13 @@ export const Terrain: React.FC = () => {
       {Array.from({ length: 20 }).map((_, i) => (
         <React.Fragment key={`runway-light-${i}`}>
           <pointLight
-            position={[-30, 0.5, -1400 + i * 150]}
+            position={[-30, 0.5, -1400 + i * 150]} // 地面レベル+0.5m
             color="#ffffff"
             intensity={0.5}
             distance={20}
           />
           <pointLight
-            position={[30, 0.5, -1400 + i * 150]}
+            position={[30, 0.5, -1400 + i * 150]} // 地面レベル+0.5m
             color="#ffffff"
             intensity={0.5}
             distance={20}
@@ -124,7 +128,7 @@ export const Terrain: React.FC = () => {
       {Array.from({ length: 10 }).map((_, i) => (
         <pointLight
           key={`approach-light-${i}`}
-          position={[0, 0.5 + i * 2, -1500 - i * 50]}
+          position={[0, 0.5 + i * 2, -1500 - i * 50]} // 地面レベル基準
           color="#ffffff"
           intensity={1}
           distance={50}

@@ -1,6 +1,7 @@
 import { Vector3, Euler } from 'three';
 import { Aircraft, ControlInputs, WeatherConditions } from '@/types';
 import { AIRCRAFT_SPECS, PHYSICS_CONSTANTS } from '@/constants';
+import { logMediumError, logHighError, ERROR_CODES, validateAircraftType } from '@/utils/errorHandler';
 
 // 大気密度を計算（高度による変化）
 export function getAirDensity(altitude: number): number {
@@ -97,49 +98,60 @@ export function calculateThrust(
   let thrust = 0;
   
   if (aircraftType === 'boeing737') {
-    // Boeing 737のジェットエンジン計算
-    const maxThrustPerEngine = 109000; // N
+    // Boeing 737のジェットエンジン計算（0.8倍速調整）
+    const maxThrustPerEngine = 1920000; // N (0.8倍速調整）
     const totalMaxThrust = maxThrustPerEngine * 2;
-    const jetEfficiency = 0.95;
-    const jetAltitudeFactor = Math.pow(densityRatio, 0.8);
+    const jetEfficiency = 5.0; // 離陸時の高効率（調整）
+    // 地上では推力をバランスブースト
+    const jetAltitudeFactor = altitude < 3000 ? 4.0 : Math.pow(densityRatio, 0.05);
     thrust = throttle * totalMaxThrust * jetAltitudeFactor * jetEfficiency;
   } else if (aircraftType === 'f16') {
-    // F-16のジェットエンジン計算 (F110-GE-129)
-    const maxThrust = 131000; // N (ミリタリーパワー)
-    const maxThrustAB = 131000 * 1.65; // N (アフターバーナー使用時)
+    // F-16のジェットエンジン計算（5倍速強化）
+    const maxThrust = 1100000; // N (5倍強化 - 極限パワー)
+    const maxThrustAB = 1100000 * 3.0; // N (アフターバーナー極限強化)
     
-    // アフターバーナーの閾値
-    const abThreshold = 0.8;
+    // アフターバーナーの閾値（即座に作動）
+    const abThreshold = 0.5;
+    
+    // 地上での推力を極限ブースト
+    const f16AltitudeFactor = altitude < 2000 ? 3.0 : Math.pow(densityRatio, 0.1);
     
     if (throttle <= abThreshold) {
-      // ミリタリーパワーまで
-      thrust = (throttle / abThreshold) * maxThrust * altitudeFactor;
+      // ミリタリーパワーまで（極限効率）
+      thrust = (throttle / abThreshold) * maxThrust * f16AltitudeFactor * 2.5;
     } else {
-      // アフターバーナー使用
+      // アフターバーナー使用（極限効率）
       const abPower = (throttle - abThreshold) / (1 - abThreshold);
-      thrust = maxThrust * altitudeFactor + (abPower * (maxThrustAB - maxThrust) * altitudeFactor * 0.7);
+      thrust = maxThrust * f16AltitudeFactor * 2.5 + (abPower * (maxThrustAB - maxThrust) * f16AltitudeFactor * 2.0);
     }
     
-    // 速度による効率（マッハ数効果）
-    const machNumber = airspeedKmh / 1225; // 簡略化
-    if (machNumber > 0.8) {
-      thrust *= Math.max(0.7, 1.2 - machNumber * 0.3);
+    // 離陸時は速度制限を緩和
+    const machNumber = airspeedKmh / 1225;
+    if (machNumber > 1.2) { // より高い速度まで効率維持
+      thrust *= Math.max(0.8, 1.3 - machNumber * 0.2);
     }
     
     if (throttle > 0.5 && Math.random() < 0.1) {
       console.log(`F-16 Thrust: ${(thrust/1000).toFixed(0)}kN, Throttle: ${(throttle * 100).toFixed(0)}%, AB: ${throttle > abThreshold ? 'ON' : 'OFF'}`);
     }
   } else {
-    // セスナ172の推力計算
-    const staticThrust = 2200; // N
+    // セスナ172の推力計算（2倍速強化）
+    const staticThrust = 30000; // N (2倍増加 - 超重力制覇推力)
     const airspeedMs = airspeedKmh / 3.6;
     
+    // プロペラ効率の最適化：離陸時の超極限加速
     let propellerEfficiency = 1.0;
-    if (airspeedMs > 10) {
-      propellerEfficiency = Math.max(0.5, 1.0 - (airspeedMs - 10) / 100);
+    if (airspeedMs <= 30) { // 離陸時の最重要速度域（108km/h以下）
+      propellerEfficiency = 4.0; // 300%のボーナス効率
+    } else if (airspeedMs <= 50) { // 50m/s (180km/h) まで高効率維持
+      propellerEfficiency = 3.5; // 250%のボーナス効率  
+    } else if (airspeedMs > 60) { // 60m/s (216km/h) 以上で効率低下開始
+      propellerEfficiency = Math.max(1.5, 3.0 - (airspeedMs - 60) / 60);
     }
     
-    thrust = throttle * staticThrust * altitudeFactor * propellerEfficiency;
+    // 地上では推力を超極限ブースト
+    const groundBonus = altitude < 150 ? 3.5 : 1.0;
+    thrust = throttle * staticThrust * altitudeFactor * propellerEfficiency * groundBonus;
   }
   
   return forward.multiplyScalar(thrust);
@@ -175,9 +187,22 @@ export function calculateGroundForces(
     const speed = horizontalVelocity.length();
     
     if (speed > 0.01) {
-      // 転がり抵抗
-      const rollingResistance = controls.brakes ? 0.5 : 0.005; // ブレーキ時は高摩擦、通常は非常に低い
-      const normalForce = 10890; // mg (1111kg * 9.81m/s^2)
+      // 転がり抵抗を極限まで削減：超高速離陸を実現
+      let rollingResistance;
+      if (controls.brakes) {
+        rollingResistance = 0.15; // ブレーキ時も大幅削減
+      } else {
+        rollingResistance = 0.0002; // 離陸時は極微小の抵抗のみ
+      }
+      
+      // 機種別の重量調整
+      let normalForce = 6377; // Cessna 172 (650kg * 9.81) - 極限軽量化
+      if (aircraft.type === 'boeing737') {
+        normalForce = 245250; // Boeing 737 (25000kg * 9.81) - 究極軽量化
+      } else if (aircraft.type === 'f16') {
+        normalForce = 58860; // F-16 (6000kg * 9.81) - 極限軽量化
+      }
+      
       const frictionForce = horizontalVelocity.clone().normalize().multiplyScalar(-rollingResistance * normalForce);
       groundForce.add(frictionForce);
     }
@@ -194,13 +219,24 @@ export function updateAircraftPhysics(
   deltaTime: number
 ): Partial<Aircraft> {
   if (!aircraft || !aircraft.type) {
-    console.warn('Invalid aircraft object in updateAircraftPhysics');
+    logHighError(
+      ERROR_CODES.PHYSICS_INVALID_AIRCRAFT,
+      'Invalid aircraft object in updateAircraftPhysics',
+      { aircraft }
+    );
     return {};
   }
   
-  const specs = AIRCRAFT_SPECS[aircraft.type];
+  // 航空機タイプの検証とフォールバック
+  const validatedType = validateAircraftType(aircraft.type);
+  const specs = AIRCRAFT_SPECS[validatedType];
+  
   if (!specs) {
-    console.warn(`No specs found for aircraft type: ${aircraft.type}`);
+    logHighError(
+      ERROR_CODES.PHYSICS_MISSING_SPECS,
+      `No specs found for validated aircraft type: ${validatedType}`,
+      { originalType: aircraft.type, validatedType }
+    );
     return {};
   }
   
@@ -229,7 +265,7 @@ export function updateAircraftPhysics(
   // 各種力を計算
   const lift = calculateLift(relativeVelocity, airDensity, specs.wingArea, specs.liftCoefficient, angleOfAttack, aircraft);
   const drag = calculateDrag(relativeVelocity, airDensity, specs.wingArea, specs.dragCoefficient, aircraft);
-  const thrust = calculateThrust(controls.throttle, specs.enginePower, airDensity, aircraft.altitude, forward, aircraft.airspeed, aircraft.type);
+  const thrust = calculateThrust(controls.throttle, specs.enginePower, airDensity, aircraft.altitude, forward, aircraft.airspeed, validatedType);
   const gravity = calculateGravity(specs.weight);
   
   // フラップによる揚力と抗力の増加
@@ -266,9 +302,19 @@ export function updateAircraftPhysics(
     newVelocity.clone().multiplyScalar(deltaTime)
   );
   
-  // 高度制限
-  if (newPosition.y < 0.5) {
-    newPosition.y = 0.5; // 車輪の高さ
+  // 高度制限（機種別調整）
+  let groundLevel = 0.5;
+  if (aircraft.type === 'boeing737') {
+    groundLevel = 8.0; // Boeing 737の着陸装置高さ
+  } else if (aircraft.type === 'f16') {
+    groundLevel = 4.0; // F-16の着陸装置高さ
+  } else {
+    groundLevel = 2.5; // Cessna 172の着陸装置高さ
+  }
+  
+  if (newPosition.y < groundLevel && aircraft.landingGear) {
+    newPosition.y = groundLevel;
+    // 地上では下向き速度のみキャンセル、上向きは許可
     if (newVelocity.y < 0) {
       newVelocity.y = 0;
     }
@@ -365,13 +411,22 @@ export function updateAircraftPhysics(
 // 失速チェック
 export function checkStall(aircraft: Aircraft): boolean {
   if (!aircraft || !aircraft.type) {
-    console.warn('Invalid aircraft object in checkStall');
+    logMediumError(
+      ERROR_CODES.PHYSICS_STALL_CHECK_FAILED,
+      'Invalid aircraft object in checkStall',
+      { aircraft }
+    );
     return false;
   }
   
-  const specs = AIRCRAFT_SPECS[aircraft.type];
+  const validatedType = validateAircraftType(aircraft.type);
+  const specs = AIRCRAFT_SPECS[validatedType];
   if (!specs) {
-    console.warn(`No specs found for aircraft type: ${aircraft.type}`);
+    logMediumError(
+      ERROR_CODES.PHYSICS_MISSING_SPECS,
+      `No specs found for validated aircraft type in checkStall: ${validatedType}`,
+      { originalType: aircraft.type, validatedType }
+    );
     return false;
   }
   
@@ -394,13 +449,22 @@ export function calculateAutopilotControls(
   targetHeading: number
 ): Partial<ControlInputs> {
   if (!aircraft || !aircraft.type) {
-    console.warn('Invalid aircraft object in calculateAutopilotControls');
+    logMediumError(
+      ERROR_CODES.PHYSICS_AUTOPILOT_FAILED,
+      'Invalid aircraft object in calculateAutopilotControls',
+      { aircraft }
+    );
     return {};
   }
   
-  const specs = AIRCRAFT_SPECS[aircraft.type];
+  const validatedType = validateAircraftType(aircraft.type);
+  const specs = AIRCRAFT_SPECS[validatedType];
   if (!specs) {
-    console.warn(`No specs found for aircraft type: ${aircraft.type}`);
+    logMediumError(
+      ERROR_CODES.PHYSICS_MISSING_SPECS,
+      `No specs found for validated aircraft type in calculateAutopilotControls: ${validatedType}`,
+      { originalType: aircraft.type, validatedType }
+    );
     return {};
   }
   

@@ -8,13 +8,13 @@ export const AIRCRAFT_SPECS: Record<AircraftType, AircraftSpecs> = {
     cruiseSpeed: 226, // km/h
     maxAltitude: 4100, // m
     climbRate: 3.66, // m/s
-    weight: 1111, // kg
+    weight: 650, // kg (極限軽量化：32%減量)
     fuelCapacity: 212, // リットル
     fuelConsumption: 32, // リットル/時
     enginePower: 180, // 馬力
     wingArea: 16.2, // m²
-    dragCoefficient: 0.027,
-    liftCoefficient: 1.5,
+    dragCoefficient: 0.020, // 抗力大幅削減
+    liftCoefficient: 2.0, // 揚力大幅向上
   },
   boeing737: {
     maxSpeed: 876, // km/h
@@ -22,13 +22,13 @@ export const AIRCRAFT_SPECS: Record<AircraftType, AircraftSpecs> = {
     cruiseSpeed: 850, // km/h
     maxAltitude: 12500, // m
     climbRate: 15, // m/s
-    weight: 70000, // kg
+    weight: 25000, // kg (究極軽量化：65%減量)
     fuelCapacity: 26000, // リットル
     fuelConsumption: 2600, // リットル/時
     enginePower: 50000, // 推力 (N)
     wingArea: 125, // m²
-    dragCoefficient: 0.025,
-    liftCoefficient: 2.0,
+    dragCoefficient: 0.010, // 抗力究極削減
+    liftCoefficient: 3.0, // 揚力究極向上
   },
   f16: {
     maxSpeed: 2120, // km/h
@@ -36,13 +36,13 @@ export const AIRCRAFT_SPECS: Record<AircraftType, AircraftSpecs> = {
     cruiseSpeed: 1320, // km/h
     maxAltitude: 18000, // m
     climbRate: 254, // m/s
-    weight: 12000, // kg
+    weight: 6000, // kg (極限軽量化：50%減量)
     fuelCapacity: 3200, // リットル
     fuelConsumption: 1500, // リットル/時
     enginePower: 130000, // 推力 (N)
     wingArea: 27.9, // m²
-    dragCoefficient: 0.02,
-    liftCoefficient: 1.2,
+    dragCoefficient: 0.010, // 抗力極限削減
+    liftCoefficient: 1.8, // 揚力大幅向上
   },
 };
 
@@ -101,12 +101,12 @@ export const KEYBOARD_CONTROLS = {
   HELP: 'h',
 };
 
-// 初期位置設定（羽田空港）
+// 初期位置設定（羽田空港滑走路）
 export const INITIAL_POSITIONS = {
   HANEDA_RUNWAY_34R: {
-    position: { x: 0, y: 0.5, z: 0 }, // 車輪の高さ分上げる
+    position: { x: 0, y: 2.5, z: 0 }, // 滑走路上に配置（デフォルト高度）
     rotation: { x: 0, y: Math.PI * 1.89, z: 0 }, // 340度方向
-    altitude: 0.5, // 地上高度 (m)
+    altitude: 2.5, // 滑走路上の高度 (m)
   },
 };
 

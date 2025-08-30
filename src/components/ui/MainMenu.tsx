@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
 import { useSimulatorStore } from '@/store/simulatorStore';
 import { AircraftType } from '@/types';
+import { ProfileMenu } from './ProfileMenu';
+import { FlightRecorder } from './FlightRecorder';
 
 interface MainMenuProps {
   onStart: () => void;
 }
 
 export const MainMenu: React.FC<MainMenuProps> = ({ onStart }) => {
-  const { resetAircraft, setGameSettings, setWeather } = useSimulatorStore();
+  const { resetAircraft, setGameSettings, setWeather, currentProfile } = useSimulatorStore();
   const [selectedAircraft, setSelectedAircraft] = useState<AircraftType>('cessna172');
   const [selectedDifficulty, setSelectedDifficulty] = useState<'easy' | 'normal' | 'hard' | 'realistic'>('normal');
   const [selectedWeather, setSelectedWeather] = useState<'clear' | 'cloudy' | 'rainy' | 'stormy'>('clear');
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showFlightRecorder, setShowFlightRecorder] = useState(false);
   
   const handleStart = () => {
     // 選択された航空機でリセット
@@ -69,6 +73,39 @@ export const MainMenu: React.FC<MainMenuProps> = ({ onStart }) => {
         <p className="text-center text-gray-400 mb-4 md:mb-8 text-sm md:text-base">
           リアルな飛行体験をブラウザで
         </p>
+        
+        {/* プロフィール情報 */}
+        <div className="mb-4 md:mb-6 text-center">
+          <div className="bg-gray-800 rounded-lg p-3 mb-3">
+            {currentProfile ? (
+              <div>
+                <span className="text-gray-400">プレイヤー: </span>
+                <span className="text-blue-400 font-semibold">{currentProfile.name}</span>
+                <div className="text-xs text-gray-500 mt-1">
+                  総フライト時間: {Math.floor(currentProfile.totalFlightTime / 60)}時間{Math.floor(currentProfile.totalFlightTime % 60)}分
+                </div>
+              </div>
+            ) : (
+              <div className="text-gray-400">
+                プロフィールが選択されていません
+              </div>
+            )}
+          </div>
+          <div className="space-x-2">
+            <button
+              onClick={() => setShowProfileMenu(true)}
+              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm"
+            >
+              プロフィール管理
+            </button>
+            <button
+              onClick={() => setShowFlightRecorder(true)}
+              className="px-4 py-2 bg-blue-700 hover:bg-blue-600 text-white rounded-lg transition-colors text-sm"
+            >
+              フライト記録
+            </button>
+          </div>
+        </div>
         
         {/* 航空機選択 */}
         <div className="mb-4 md:mb-6">
@@ -183,6 +220,18 @@ export const MainMenu: React.FC<MainMenuProps> = ({ onStart }) => {
           <p className="mobile-hidden">Hキーでヘルプ表示 | ESCキーでポーズ</p>
           <p className="mobile-only">タップでヘルプ表示</p>
         </div>
+        
+        {/* プロフィールメニュー */}
+        <ProfileMenu
+          isVisible={showProfileMenu}
+          onClose={() => setShowProfileMenu(false)}
+        />
+        
+        {/* フライトレコーダー */}
+        <FlightRecorder
+          isVisible={showFlightRecorder}
+          onClose={() => setShowFlightRecorder(false)}
+        />
       </div>
     </div>
   );
