@@ -140,8 +140,7 @@ export const usePhysicsUpdate = () => {
       aircraft,
       effectiveControls,
       weather,
-      clampedDelta,
-      advancedAero
+      clampedDelta
     );
     
     // 地面衝突チェック（最適化: 低高度時のみ頻繁にチェック）
