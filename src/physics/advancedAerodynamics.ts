@@ -92,7 +92,7 @@ export class AdvancedAerodynamics {
     const gLoading = this.calculateGLoading(aircraft, deltaTime);
     
     // 失速警報
-    const stallWarning = this.shouldTriggerStallWarning(stallState, speed, aircraft.type);
+    const stallWarning = this.shouldTriggerStallWarning(stallState, speed, aircraft.type, aircraft.altitude);
     
     // スピン回復
     const spinRecovery = this.calculateSpinRecovery(aircraft, stallState, spinType, controls);
@@ -318,8 +318,25 @@ export class AdvancedAerodynamics {
   private shouldTriggerStallWarning(
     stallState: AdvancedAerodynamicState['stallState'],
     speed: number,
-    aircraftType: string
+    aircraftType: string,
+    altitude: number
   ): boolean {
+    // 地上にいる場合は失速警告を無効化
+    if (altitude <= 10) { // 10メートル以下は地上とみなす
+      return false;
+    }
+    
+    // F-16の場合、低高度での急上昇時は失速警告を抑制
+    if (aircraftType === 'f16' && altitude < 500) {
+      // 低高度（500m未満）でのみ適用される特別ルール
+      // 速度が最低飛行速度（失速速度の1.2倍）以上あれば警告しない
+      const specs = AIRCRAFT_SPECS[aircraftType];
+      const minFlyingSpeed = (specs.stallSpeed / 3.6) * 1.2; // km/h -> m/s, then 1.2x
+      if (speed >= minFlyingSpeed) {
+        return false;
+      }
+    }
+    
     return stallState === 'approaching' || stallState === 'stalled';
   }
   

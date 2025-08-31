@@ -11,39 +11,61 @@ export const QuickActions: React.FC = () => {
     
     // 航空機タイプ別の離陸プロファイル
     if (aircraftType === 'f16') {
-      // F-16: 超高速離陸
+      // F-16: 安全な離陸プロファイル（Boeing 737と同様にフラップを使用）
       setAircraft({
         throttle: 1.0,
         engineRPM: 100, // ジェットエンジン
-        flaps: 0, // F-16は通常フラップなしで離陸
+        flaps: 10, // 離陸用フラップ（Boeing 737を参考）
         brakes: false,
         landingGear: true,
       });
       
       setControls({
-        throttle: 1.0, // 即座にアフターバーナー
-        flaps: 0,
+        throttle: 1.0, // フルパワー
+        flaps: 10,
         brakes: false,
         pitch: 0,
         roll: 0,
         yaw: 0,
       });
 
-      // 0.2秒後: 超高速機首上げ開始
+      // 1秒後: 非常に軽い機首上げ開始
       setTimeout(() => {
-        setControls({ throttle: 1.0, pitch: 0.2 });
-      }, 200);
+        setControls({ throttle: 1.0, pitch: 0.05, flaps: 10 });
+      }, 1000);
 
-      // 0.3秒後: 超高速強制離陸
+      // 2秒後: 穏やかな離陸角度
       setTimeout(() => {
-        setControls({ throttle: 1.0, pitch: 0.4 });
-      }, 300);
+        setControls({ throttle: 1.0, pitch: 0.08, flaps: 10 });
+      }, 2000);
 
-      // 1秒後: 超高速ギア格納
+      // 3秒後: 安定した緩やかな上昇角度
+      setTimeout(() => {
+        setControls({ throttle: 1.0, pitch: 0.06, flaps: 10 });
+      }, 3000);
+
+      // 6秒後: ギア格納（フラップ維持）
       setTimeout(() => {
         setAircraft({ landingGear: false });
-        setControls({ landingGear: false, pitch: 0.3 });
-      }, 1000);
+        setControls({ landingGear: false, pitch: 0.05, flaps: 10 });
+      }, 6000);
+
+      // 4秒後: 35フィート（10.7m）相当で水平飛行開始
+      setTimeout(() => {
+        setControls({ throttle: 1.0, pitch: 0.02, flaps: 10 });
+      }, 4000);
+
+      // 6秒後: ギア格納（水平飛行維持）
+      setTimeout(() => {
+        setAircraft({ landingGear: false });
+        setControls({ landingGear: false, pitch: 0.0, flaps: 10 });
+      }, 6000);
+
+      // 8秒後: フラップ格納と完全水平飛行
+      setTimeout(() => {
+        setAircraft({ flaps: 0 });
+        setControls({ throttle: 0.8, pitch: 0.0, flaps: 0 });
+      }, 8000);
 
     } else if (aircraftType === 'boeing737') {
       // Boeing 737: 商用ジェット離陸
@@ -80,22 +102,22 @@ export const QuickActions: React.FC = () => {
         setControls({ throttle: 1.0, pitch: 0.8, flaps: 15 });
       }, 600);
 
-      // 2秒後: 離陸後の機首上げ超大幅維持
+      // 1.5秒後: 35フィート（10.7m）相当で水平飛行開始
       setTimeout(() => {
-        setControls({ throttle: 1.0, pitch: 0.6, flaps: 15 });
-      }, 2000);
+        setControls({ throttle: 1.0, pitch: 0.05, flaps: 15 });
+      }, 1500);
 
-      // 8秒後: ギア格納（機首上げ大幅維持）
+      // 6秒後: ギア格納（水平飛行維持）
       setTimeout(() => {
         setAircraft({ landingGear: false, flaps: 5 });
-        setControls({ landingGear: false, flaps: 5, pitch: 0.25 });
-      }, 8000);
+        setControls({ landingGear: false, flaps: 5, pitch: 0.0 });
+      }, 6000);
 
-      // 12秒後: クリーン構成（上昇姿勢大幅維持）
+      // 8秒後: クリーン構成（完全水平飛行）
       setTimeout(() => {
         setAircraft({ flaps: 0 });
-        setControls({ flaps: 0, pitch: 0.2 });
-      }, 12000);
+        setControls({ flaps: 0, pitch: 0.0, throttle: 0.8 });
+      }, 8000);
 
     } else {
       // Cessna 172: 既存の離陸プロファイル
@@ -117,27 +139,29 @@ export const QuickActions: React.FC = () => {
       });
 
       setTimeout(() => {
-        setControls({ throttle: 1.0, pitch: 0.3, flaps: 10 });
-      }, 500);
+        setControls({ throttle: 1.0, pitch: 0.08, flaps: 10 });
+      }, 1000);
 
       setTimeout(() => {
-        setControls({ throttle: 1.0, pitch: 0.55, flaps: 10 });
-      }, 750);
-
-      // 1.5秒後: 離陸後の機首上げ大幅維持
-      setTimeout(() => {
-        setControls({ throttle: 1.0, pitch: 0.4, flaps: 10 });
+        setControls({ throttle: 1.0, pitch: 0.12, flaps: 10 });
       }, 1500);
 
+      // 2.5秒後: 35フィート（10.7m）相当で水平飛行開始
+      setTimeout(() => {
+        setControls({ throttle: 1.0, pitch: 0.02, flaps: 10 });
+      }, 2500);
+
+      // 6秒後: ギア格納（水平飛行維持）
       setTimeout(() => {
         setAircraft({ landingGear: false, flaps: 5 });
-        setControls({ flaps: 5, landingGear: false, pitch: 0.35 });
-      }, 8000);
+        setControls({ flaps: 5, landingGear: false, pitch: 0.0 });
+      }, 6000);
 
+      // 8秒後: クリーン構成（完全水平飛行）
       setTimeout(() => {
         setAircraft({ flaps: 0 });
-        setControls({ flaps: 0, pitch: 0.3 });
-      }, 12000);
+        setControls({ flaps: 0, pitch: 0.0, throttle: 0.8 });
+      }, 8000);
     }
   };
   

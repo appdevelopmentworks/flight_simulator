@@ -419,6 +419,11 @@ export function checkStall(aircraft: Aircraft): boolean {
     return false;
   }
   
+  // 地上にいる場合は失速判定を無効化
+  if (aircraft.altitude <= 10) { // 10メートル以下は地上とみなす
+    return false;
+  }
+  
   const validatedType = validateAircraftType(aircraft.type);
   const specs = AIRCRAFT_SPECS[validatedType];
   if (!specs) {
