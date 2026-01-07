@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Commands
 
-Available npm scripts:
+Available npm scripts from package.json:
 - `npm run dev` - Start Next.js development server
 - `npm run build` - Build the production application
 - `npm run start` - Start production server
@@ -33,12 +33,13 @@ This is a WebFlight Simulator Pro built with Next.js 14 and React Three Fiber. T
 - Performance optimization with LOD system and memory management
 - Auto-LOD manager for terrain and object culling
 
-**Physics Engine** (`src/physics/aerodynamics.ts`):
-- Comprehensive flight dynamics simulation
-- Realistic calculations: lift, drag, thrust, ground forces
-- Aircraft-specific aerodynamic modeling
-- Atmospheric density modeling with altitude effects
-- Advanced features: stall detection, autopilot, ILS guidance
+**Physics Engine** (`src/physics/aerodynamics.ts` + `src/physics/advancedAerodynamics.ts`):
+- Comprehensive flight dynamics simulation with realistic lift, drag, thrust calculations
+- Aircraft-specific aerodynamic modeling with performance envelopes
+- Atmospheric density modeling with altitude and temperature effects
+- Advanced aerodynamics: stall/spin modeling, ground effect, compressibility
+- Autopilot integration with ILS guidance capabilities
+- G-force simulation with G-LOC (G-force induced loss of consciousness) effects
 
 **Aircraft Systems**:
 - Three distinct aircraft with unique flight characteristics
@@ -58,8 +59,10 @@ This is a WebFlight Simulator Pro built with Next.js 14 and React Three Fiber. T
 - Environmental audio effects
 
 **Navigation System** (`src/systems/NavigationSystem.ts`):
-- ILS approach guidance
-- GPS navigation capabilities
+- ILS (Instrument Landing System) with localizer/glideslope guidance
+- VOR/DME navigation capabilities
+- GPS waypoint system and flight planning
+- Visual approach aids and runway alignment
 
 **User Profile & Recording System**:
 - Persistent user profiles with flight statistics
@@ -103,15 +106,35 @@ This is a WebFlight Simulator Pro built with Next.js 14 and React Three Fiber. T
 ### Development Architecture Notes
 
 - Client-side rendering required for 3D components ('use client' directive)
-- SSR compatibility with proper hydration handling
-- TypeScript with path aliases (@/* for src/*)
-- Three.js transpilation configured in next.config.js
-- Jest configured with proper ES6 module handling for Three.js libraries
+- SSR compatibility with proper hydration handling for React Three Fiber
+- TypeScript with strict typing and path aliases (@/* for src/*)
+- Three.js transpilation configured in next.config.js with `transpilePackages: ['three']`
+- Jest testing environment with jsdom and React Testing Library integration
+- Performance monitoring system with FPS tracking and memory usage alerts
 
 ### Important Codebase Patterns
 
-1. **Error Handling**: Comprehensive error handling with error codes and logging
-2. **Type Safety**: Strict TypeScript with validation functions
-3. **Performance**: Automatic memory management and performance monitoring
-4. **State Persistence**: Settings and profiles automatically saved to LocalStorage
-5. **Real-time Updates**: Physics calculations at 60 FPS with delta time handling
+1. **Error Handling**: Comprehensive error handling with custom error codes (`src/utils/errorHandler.ts`)
+2. **Type Safety**: Strict TypeScript with custom aircraft and physics interfaces (`src/types/index.ts`)
+3. **Performance Optimization**: Automatic LOD management, frame splitting, and memory monitoring
+4. **State Persistence**: LocalStorage integration with versioning (`src/utils/storageManager.ts`)
+5. **Real-time Physics**: 60 FPS physics loop with adaptive delta time and performance scaling
+6. **Modular Systems**: Decoupled systems (Weather, Audio, Navigation) with clean interfaces
+7. **Mobile Responsive**: Touch controls and responsive UI scaling for mobile devices
+
+### Critical Implementation Details
+
+- **Physics Loop**: Uses `useFrame` hook from React Three Fiber for 60 FPS updates
+- **State Management**: Zustand with persistence middleware and subscription patterns
+- **3D Audio**: Spatial audio system with position-based engine sounds and environmental effects
+- **Weather Integration**: Real-time weather affects flight dynamics and visual systems
+- **Advanced Flight Model**: Includes stall/spin recovery, ground effect, and compressibility modeling
+
+# important-instruction-reminders
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
+
+      
+      IMPORTANT: this context may or may not be relevant to your tasks. You should not respond to this context unless it is highly relevant to your task.

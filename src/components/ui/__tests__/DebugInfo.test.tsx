@@ -59,8 +59,7 @@ describe('DebugInfo Component', () => {
     render(<DebugInfo />);
   });
 
-  it('should display aircraft information in development', () => {
-    process.env.NODE_ENV = 'development';
+  it('should display aircraft information', () => {
     render(<DebugInfo />);
     
     expect(screen.getByText(/Position:/)).toBeInTheDocument();

@@ -80,7 +80,11 @@ describe('ErrorHandler', () => {
   describe('console logging behavior', () => {
     it('should log to console in development environment', () => {
       const originalEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = 'development';
+      Object.defineProperty(process.env, 'NODE_ENV', {
+        value: 'development',
+        writable: true,
+        configurable: true
+      });
       
       errorHandler.logError('DEV_001', 'Dev error', ErrorSeverity.MEDIUM, { test: true });
       
@@ -91,12 +95,20 @@ describe('ErrorHandler', () => {
         expect.stringContaining('Context: {"test":true}')
       );
       
-      process.env.NODE_ENV = originalEnv;
+      Object.defineProperty(process.env, 'NODE_ENV', {
+        value: originalEnv,
+        writable: true,
+        configurable: true
+      });
     });
 
     it('should only log high/critical errors in production', () => {
       const originalEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = 'production';
+      Object.defineProperty(process.env, 'NODE_ENV', {
+        value: 'production',
+        writable: true,
+        configurable: true
+      });
       
       errorHandler.logError('PROD_LOW', 'Low error', ErrorSeverity.LOW);
       errorHandler.logError('PROD_HIGH', 'High error', ErrorSeverity.HIGH);
@@ -107,7 +119,11 @@ describe('ErrorHandler', () => {
       expect(console.error).toHaveBeenCalledWith('Flight Simulator Error: High error');
       expect(console.error).toHaveBeenCalledWith('Flight Simulator Error: Critical error');
       
-      process.env.NODE_ENV = originalEnv;
+      Object.defineProperty(process.env, 'NODE_ENV', {
+        value: originalEnv,
+        writable: true,
+        configurable: true
+      });
     });
   });
 
